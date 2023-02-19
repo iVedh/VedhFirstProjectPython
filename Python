@@ -1,0 +1,121 @@
+# creates pygame
+import pygame
+# stops code when you call it
+from sys import exit
+import math
+import random
+# making fps var
+clock = pygame.time.Clock()
+pygame.init()
+# initializes everything in pygame
+pygame.display.set_caption("Vedh's First Game")
+WIDTH, HEIGHT = 900, 600
+# makes normal screen
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# makes image of bullet
+bullet = pygame.image.load("bullet.png")
+bullet = pygame.transform.scale(bullet, (30,50))
+player = pygame.Surface((100,100))
+enemy = pygame.Surface((50,50))
+# enemy x random pos
+enemyX = random.randint(50, 800)
+enemyY = 50
+changeenemyx =3
+enemy.fill((200,0,0))
+player.fill((0,200,0))
+screen.fill("white")
+# bool for moving smooth
+moveright = False
+moveleft = False
+playerx = 400
+playery = 400
+bullety = 400
+bulletx = 400
+# sets mode of bullet with vars
+bullet_state = "loaded"
+change_in_x_pos_bullet = 8
+# function for getting distance
+def isCollision(enemyX, enemyY, bulletx, bullety):
+    distance = math.sqrt(math.pow(enemyX - bulletx, 2) + (math.pow(enemyY - bullety, 2)))
+    if distance < 30:
+        return True
+    else:
+        return False
+    #function for if bullet shot
+def shot(bulletx, bullety):
+    global bullet_state
+    bullet_state = "fired"
+    screen.blit(bullet, (bulletx, bullety))
+    bullety -= change_in_x_pos_bullet
+enemyhealth = 5
+score_value = 0
+font = pygame.font.Font("freesansbold.ttf", 20)
+textx = 10
+texty = 10
+# function to show score
+def show_score(x,y):
+    score = font.render("Score: " + str(score_value), True, (0,0,0))
+    screen.blit(score,(x,y))
+
+while True:
+    show_score(textx,texty)
+    if moveright == True:
+        playerx += 10
+    if moveleft == True:
+        playerx -= 10
+    for event in pygame.event.get():
+
+        if event.type == pygame.KEYDOWN:
+           if event.key == pygame.K_RIGHT:
+               moveright = True
+           if event.key == pygame.K_LEFT:
+               moveleft = True
+# checks for if you went up on the keys
+           if event.key == pygame.K_UP:
+             if bullet_state == "loaded":
+                bulletx = playerx
+                # shot bullet
+                shot(bulletx, bullety)
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                moveleft = False
+            if event.key == pygame.K_RIGHT:
+                moveright = False
+
+    if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+            # stop while loop
+# starts framerate of 60 fps
+    clock.tick(60)
+    if bullety <= -50:
+        bullety = 400
+        bullet_state = "loaded"
+    if bullet_state == "fired":
+        shot(bulletx, bullety)
+        bullety -= change_in_x_pos_bullet
+    pygame.display.update()
+    # updates everything
+    # puts surface on surface with block image transfer
+    # sets the TOP LEFT corner of surface to a point
+    screen.fill("white")
+    screen.blit(player, (playerx, playery))
+    screen.blit(enemy, (enemyX, enemyY))
+    # checks for bullet and enemy collision
+    if isCollision(enemyX, enemyY, bulletx, bullety):
+        bullety = playery
+        bullet_state = "loaded"
+        enemyhealth -= 1
+    if enemyhealth == 0:
+        enemyX = random.randint(50, 800)
+        enemyhealth = 5
+        score_value += 1
+    enemyX += changeenemyx
+    if enemyX <= 0:
+        changeenemyx = 3
+    elif enemyX >= 860:
+        changeenemyx = -3
+    if playerx <= 0:
+        playerx = 0
+    elif playerx >= 800:
+        playerx = 800
